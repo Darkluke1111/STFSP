@@ -1,18 +1,16 @@
 import substance_painter
+import substance_painter.logging as l
 import json
-import SkyrimTools.logger as logger
 import os
+from SkyrimTools.constants import PLUGIN_NAME
 
 
 class Config():
     def __init__(self, pluginPath) -> None:
-        global l 
-        l = logger.INSTANCE()
         self.globalConfigPath = "{}/config.json".format(pluginPath)
         self.crunch_location = "{}/crunch_x64.exe".format(pluginPath)
         self.nvtt_location = ""
         self.hide_terminal =  False
-        self.logging_level = "INFO"
         self.png_output = ""
         self.dds_output = ""
         self.alpha_blending =  False
@@ -22,16 +20,13 @@ class Config():
         self.quality = "fast"
         self.suffixes = {"diffuse": "", "normal": "_n", "glow": "_g", "reflective": "_m"}
 
-        l.logDebug("finished initializing configManager")
+        l.log(l.INFO, PLUGIN_NAME, "finished initializing configManager")
 
     def set_nvtt_location(self, nvtt_location):
         self.nvtt_location = nvtt_location
 
     def set_hide_terminal(self, hide_terminal):
         self.hide_terminal = hide_terminal
-
-    def set_logging_level(self, logging_level):
-        self.logging_level = logging_level
 
     def set_png_output(self, png_output):
         self.png_output = png_output
@@ -59,13 +54,13 @@ class Config():
         self.saveLocalConfigs()
 
     def saveGlobalConfigs(self):
-        l.logDebug("saving global settings to {}".format(self.globalConfigPath))
+        l.log(l.INFO, PLUGIN_NAME, "saving global settings to {}".format(self.globalConfigPath))
         with open(self.globalConfigPath,'w+', encoding='utf-8') as f:
-            json.dump({'nvtt_location': self.nvtt_location, 'hide_terminal': self.hide_terminal, 'logging_level': self.logging_level}, f, ensure_ascii=False, indent=4)
+            json.dump({'nvtt_location': self.nvtt_location, 'hide_terminal': self.hide_terminal}, f, ensure_ascii=False, indent=4)
 
     def saveLocalConfigs(self):
         if substance_painter.project.is_open():
-            l.logDebug("saving project settings")
+            l.log(l.INFO, PLUGIN_NAME, "saving project settings")
             self.localConfig = substance_painter.project.Metadata("skyrim_tools")
             self.localConfig.set("png_output",      self.png_output)
             self.localConfig.set("dds_output",      self.dds_output)
@@ -82,7 +77,7 @@ class Config():
 
 
     def loadGlobalConfigs(self):
-        l.logDebug("loading global settings from {}".format(self.globalConfigPath))
+        l.log(l.INFO, PLUGIN_NAME, "loading global settings from {}".format(self.globalConfigPath))
         if not os.path.isfile(self.globalConfigPath):
             self.saveGlobalConfigs()
         
@@ -92,13 +87,11 @@ class Config():
                 self.nvtt_location = data['nvtt_location']
             if 'hide_terminal' in data:
                 self.hide_terminal = data['hide_terminal']
-            if 'logging_level' in data:
-                self.logging_level = data['logging_level']
 
     def loadLocalConfigs(self):
         if substance_painter.project.is_open():
             self.localConfig = substance_painter.project.Metadata("skyrim_tools")
-            l.logDebug("loading project settings")
+            l.log(l.INFO, PLUGIN_NAME, "loading project settings")
             
             self.png_output        = self.localConfig.get("png_output")
             self.dds_output        = self.localConfig.get("dds_output")

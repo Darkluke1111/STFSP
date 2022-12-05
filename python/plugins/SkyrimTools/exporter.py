@@ -1,11 +1,10 @@
 import string
 import substance_painter.export
 import substance_painter.resource
+import substance_painter.logging as l
 import substance_painter
 from SkyrimTools.configManager import Config
-import SkyrimTools.logger as logger
-
-l = logger.INSTANCE()
+from SkyrimTools.constants import PLUGIN_NAME
 
 def export(config: Config):
 
@@ -16,13 +15,13 @@ def export(config: Config):
     if config.reflection:
         requiredTextures.append("$textureSet_m")
 
-    l.logDebug("Exporting textures: " + " ".join(requiredTextures))
+    l.log(l.INFO, PLUGIN_NAME, "Exporting textures: " + " ".join(requiredTextures))
 
     sets = substance_painter.textureset.all_texture_sets()
-    l.logDebug("Exporting texture sets: " + " ".join(map(lambda x: x.name(),sets)))
+    l.log(l.INFO, PLUGIN_NAME, "Exporting texture sets: " + " ".join(map(lambda x: x.name(),sets)))
     for tset in sets:
 
-        l.logDebug("Exporting into " + outputDir)
+        l.log(l.INFO, PLUGIN_NAME, "Exporting into " + outputDir)
         export_config = buildExportConfig(outputDir, tset, requiredTextures)
 
         # Actual export operation:
@@ -30,8 +29,8 @@ def export(config: Config):
 
         # In case of error, display a human readable message:
         if export_result.status != substance_painter.export.ExportStatus.Success:
-            l.logError(export_result.message)
-    l.logDebug("Finished expot operation")
+            l.log(l.ERROR, PLUGIN_NAME, export_result.message)
+    l.log(l.INFO, PLUGIN_NAME, "Finished expot operation")
 
 def exportTextureSet(config: Config, tset):
     outputDir = config.png_output
@@ -41,9 +40,9 @@ def exportTextureSet(config: Config, tset):
     if config.reflection:
         requiredTextures.append("$textureSet_m")
 
-    l.logDebug("Exporting textures: " + " ".join(requiredTextures))
-    l.logDebug("Building config for " + tset.name())
-    l.logDebug("Exporting into " + outputDir)
+    l.log(l.INFO, PLUGIN_NAME, "Exporting textures: " + " ".join(requiredTextures))
+    l.log(l.INFO, PLUGIN_NAME, "Building config for " + tset.name())
+    l.log(l.INFO, PLUGIN_NAME, "Exporting into " + outputDir)
     export_config = buildExportConfig(outputDir, tset, requiredTextures)
 
     # Actual export operation:
@@ -51,9 +50,9 @@ def exportTextureSet(config: Config, tset):
 
     # In case of error, display a human readable message:
     if export_result.status != substance_painter.export.ExportStatus.Success:
-        l.logError(export_result.message)
+        l.log(l.ERROR, PLUGIN_NAME, export_result.message)
 
-    l.logDebug("Finished expot operation")
+    l.log(l.INFO, PLUGIN_NAME, "Finished expot operation")
 
 
 def buildExportConfig(outputDir, textureSet, requiredTextures):

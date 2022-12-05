@@ -23,39 +23,35 @@ import substance_painter
 import substance_painter_plugins
 from PySide2.QtWidgets import QMenu, QFileDialog, QDialog, QFormLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QWidget, QCheckBox, QComboBox, QVBoxLayout, QMessageBox
 import substance_painter.ui
+import substance_painter.logging as l
 from subprocess import Popen, PIPE, CREATE_NO_WINDOW
 import SkyrimTools.ui  as ui
 import SkyrimTools.exporter as exporter
 import SkyrimTools.configManager as configManager
 import SkyrimTools.crunchConverter as crunchConverter
 import SkyrimTools.nvidiaConverter as nvidiaConverter
-import SkyrimTools.logger as logger
+from SkyrimTools.constants import PLUGIN_NAME
+
 
 plugin_widgets = []
 pluginDirPath = None
 config: configManager.Config = None
 export_one_menu = None
 
-
-
 def start_plugin():
     """This method is called when the plugin is started."""
-    global l 
+
     global config
-    l = logger.INSTANCE()
-    l.setMode("DEBUG")
-    l.setPrefix("[SkyrimTools] ")
     setPluginPath()
     config = configManager.Config(pluginDirPath)
     config.loadSettings()
-    l.setMode(config.logging_level)
 
     substance_painter.event.DISPATCHER.connect(substance_painter.event.ProjectOpened, onProjectOpened)
     substance_painter.event.DISPATCHER.connect(substance_painter.event.ProjectCreated, onProjectOpened)
     setupMenu()
 
 def onProjectOpened(e):
-    l.logDebug("Project Opened")
+    l.log(l.INFO,PLUGIN_NAME, "Project Opened")
     config.loadSettings()
     removeAllActions(export_one_menu)
     for tset in substance_painter.textureset.all_texture_sets():
@@ -71,16 +67,17 @@ def setPluginPath():
         path = p + "/plugins/SkyrimTools"
         if os.path.isdir(path):
             pluginDirPath = path
-            l.logInfo("Plugin Directory set to {}".format(path))
+            l.log(l.INFO,PLUGIN_NAME, "Plugin Directory set to {}".format(path))
+
             return        
     if not pluginDirPath:
-        l.logError("Plugin Directory not found! Can't activate plugin")
+        l.log(l.ERROR, PLUGIN_NAME, "Plugin Directory not found! Can't activate plugin")
         close_plugin()
         return
 
 def setupMenu():
     global export_one_menu
-    l.logDebug("Setup Menu")
+    l.log(l.INFO, PLUGIN_NAME, "Setup Menu")
     export_widget = QMenu()
     export_widget.setTitle("Skyrim")
     export_widget.addAction("Export All", exportAndConvert, "member")
@@ -93,7 +90,7 @@ def setupMenu():
 
 
 def close_plugin():
-    l.logDebug("Disabling Plugin")
+    l.log(l.INFO, PLUGIN_NAME, "Disabling Plugin")
     for widget in plugin_widgets:
         substance_painter.ui.delete_ui_element(widget)
     plugin_widgets.clear()
@@ -122,15 +119,15 @@ def exportAndConvertTextureSet(textureSet):
 
 def isExportValid():
     if not substance_painter.project.is_open():
-        l.logError("No project to export")
+        l.log(l.ERROR, PLUGIN_NAME, "No project to export")
         return False
     if (not config.png_output) or (not config.dds_output):
-        l.logError("You need to set the png and dds output paths before you can export")
+        l.log(l.ERROR, PLUGIN_NAME, "You need to set the png and dds output paths before you can export")
         return False
     return True
 
 def show_settings_dialog():
-    l.logDebug("Show Settings")
+    l.log(l.INFO, PLUGIN_NAME, "Show Settings")
     ui.Settings_Dialog(config, parent = plugin_widgets[0]).show()
     
 

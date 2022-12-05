@@ -3,10 +3,9 @@ import string
 from subprocess import Popen, PIPE, CREATE_NO_WINDOW
 from abc import ABC, abstractmethod
 import substance_painter
+import substance_painter.logging as l
 import SkyrimTools.configManager as cm
-import SkyrimTools.logger
-
-l = SkyrimTools.logger.INSTANCE()
+from SkyrimTools.constants import PLUGIN_NAME
 
 class AbstractConverter(ABC):
 
@@ -55,17 +54,17 @@ class AbstractConverter(ABC):
 
     def logIfPresent(self,msg, err):
         if(msg):
-            l.logDebug(msg.decode("utf-8"))
+            l.log(l.INFO, PLUGIN_NAME, msg.decode("utf-8"))
         if(err):
-            l.logError(err.decode("utf-8"))
+            l.log(l.ERROR, PLUGIN_NAME, err.decode("utf-8"))
 
     def convertTexture(self, tset, texture, config, kwargs):
         cmd =  self.buildCommand(tset, texture, config)
-        l.logDebug("Running: " + " ".join(cmd))
+        l.log(l.INFO, PLUGIN_NAME, "Running: " + " ".join(cmd))
         p = Popen(cmd, stdout= PIPE, **kwargs)
-        if l.mode == "DEBUG" :
-            out, err = p.communicate()
-            self.logIfPresent(out, err)
+
+        out, err = p.communicate()
+        self.logIfPresent(out, err)
 
 
     @abstractmethod

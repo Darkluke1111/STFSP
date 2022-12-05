@@ -2,10 +2,8 @@ from PySide2.QtWidgets import QMenu, QFileDialog, QDialog, QFormLayout, QHBoxLay
 from SkyrimTools.configManager import Config
 from PySide2.QtCore import QObject, Signal, Slot 
 import substance_painter
-import SkyrimTools.logger
-
-l = SkyrimTools.logger.INSTANCE()
-
+import substance_painter.logging as l
+from SkyrimTools.constants import PLUGIN_NAME
 
 
 class Settings_Dialog(QDialog):
@@ -140,8 +138,6 @@ class GlobalConfigTab(QWidget):
 
         self.config = config
 
-        
-
         self.nvttLabel = QLabel("NVTT location (if available)")
         self.nvttLabel.setToolTip("The path of the Nvidia Texture Tools folder. This is only required if you want to use BS7 compression. If nothing is set here it will fall back to crunch compression")
 
@@ -154,19 +150,9 @@ class GlobalConfigTab(QWidget):
         self.hideTerminalWindowsBox.setChecked(config.hide_terminal)
         self.hideTerminalWindowsBox.clicked.connect(config.set_hide_terminal)
 
-        self.loggingLevelLabel = QLabel("Logging Level")
-        self.loggingLevelLabel.setToolTip("Defines the granularity of logging")
-        self.loggingLevelCombo = QComboBox()
-        self.loggingLevelCombo.addItems(list(SkyrimTools.logger.modes.keys()))
-        self.loggingLevelCombo.setCurrentText(config.logging_level)
-        self.loggingLevelCombo.currentTextChanged.connect(config.set_logging_level)
-        self.loggingLevelCombo.currentTextChanged.connect(l.setMode)
-
-
         self.layout = QFormLayout()
 
         self.layout.addRow(self.nvttLabel, self.nvttField)
         self.layout.addRow(self.hideTerminalWindowsLabel, self.hideTerminalWindowsBox)
-        self.layout.addRow(self.loggingLevelLabel,self.loggingLevelCombo)
 
         self.setLayout(self.layout)
