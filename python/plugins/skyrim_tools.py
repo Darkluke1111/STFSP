@@ -45,6 +45,13 @@ def start_plugin():
     substance_painter.event.DISPATCHER.connect(substance_painter.event.ProjectCreated, onProjectOpened)
     setupMenu()
 
+    if substance_painter.project.is_open():
+        onProjectOpened(None)
+
+def close_plugin():
+    substance_painter.event.DISPATCHER.disconnect(substance_painter.event.ProjectOpened, onProjectOpened)
+    substance_painter.event.DISPATCHER.disconnect(substance_painter.event.ProjectCreated, onProjectOpened)
+
 def onProjectOpened(e):
     l.log(l.INFO,PLUGIN_NAME, "Project Opened")
     removeAllActions(export_one_menu)
@@ -52,8 +59,12 @@ def onProjectOpened(e):
         export_one_menu.addAction(tset.name(),lambda n = tset: exportAndConvertTextureSet(n), "member")
 
 def removeAllActions(menu: QMenu):
-    for action in menu.actions():
-        menu.removeAction(action)
+    #Quick and dirty way to prevent a Qt related error message (which is harmless as far as I know) from showing up. There is probably a better way but this works for now...
+    try:
+        for action in menu.actions():
+            menu.removeAction(action)
+    except RuntimeError:
+        pass
 
 def setPluginPath():
     global pluginDirPath
