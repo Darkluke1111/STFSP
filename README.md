@@ -2,6 +2,8 @@
 
 Github Project for STFSP (Skyrim Tools for Substance Painter), a collection of tools, assets and shaders that make creating textures for Skyrim models easier and faster.
 
+For instructions on how to use those tools, take a look into the [wiki](https://github.com/Darkluke1111/STFSP/wiki)
+
 ## Setting up SP for development
 
 1. Link the assets directory to SP
