@@ -102,7 +102,8 @@ def close_plugin():
 
 
 def exportAndConvert():
-    pass
+    for tset in substance_painter.textureset.all_texture_sets():
+        exportAndConvertTextureSet(tset)
 
 def exportAndConvertTextureSet(textureSet):
     if not isExportValid():
