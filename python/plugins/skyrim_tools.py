@@ -27,7 +27,7 @@ import substance_painter.logging as l
 from subprocess import Popen, PIPE, CREATE_NO_WINDOW
 import SkyrimTools.ui  as ui
 import SkyrimTools.exporter as exporter
-import SkyrimTools.configManager as configManager
+import SkyrimTools.configManager as ConfigManager
 import SkyrimTools.crunchConverter as crunchConverter
 import SkyrimTools.nvidiaConverter as nvidiaConverter
 from SkyrimTools.constants import PLUGIN_NAME
@@ -35,16 +35,11 @@ from SkyrimTools.constants import PLUGIN_NAME
 
 plugin_widgets = []
 pluginDirPath = None
-config: configManager.Config = None
 export_one_menu = None
 
 def start_plugin():
-    """This method is called when the plugin is started."""
-
-    global config
     setPluginPath()
-    config = configManager.Config(pluginDirPath)
-    config.loadSettings()
+    ConfigManager.init(pluginDirPath)
 
     substance_painter.event.DISPATCHER.connect(substance_painter.event.ProjectOpened, onProjectOpened)
     substance_painter.event.DISPATCHER.connect(substance_painter.event.ProjectCreated, onProjectOpened)
@@ -52,7 +47,6 @@ def start_plugin():
 
 def onProjectOpened(e):
     l.log(l.INFO,PLUGIN_NAME, "Project Opened")
-    config.loadSettings()
     removeAllActions(export_one_menu)
     for tset in substance_painter.textureset.all_texture_sets():
         export_one_menu.addAction(tset.name(),lambda n = tset: exportAndConvertTextureSet(n), "member")
@@ -97,38 +91,31 @@ def close_plugin():
 
 
 def exportAndConvert():
-    if not isExportValid():
-        return
-
-    exporter.export(config)
-    if config.nvtt_location and config.nvtt_location != "":
-        converter = nvidiaConverter.NvidiaConverter()
-    else:
-        converter = crunchConverter.CrunchConverter()
-    converter.convert(config)
+    pass
 
 def exportAndConvertTextureSet(textureSet):
     if not isExportValid():
         return
-    exporter.exportTextureSet(config, textureSet)
-    if config.nvtt_location and config.nvtt_location != "":
+    exporter.exportTextureSet(textureSet)
+    if ConfigManager.global_config["nvtt_location"] and ConfigManager.global_config["nvtt_location"] != "":
         converter = nvidiaConverter.NvidiaConverter()
     else:
         converter = crunchConverter.CrunchConverter()
-    converter.convertTextureSet(config, textureSet)
+    converter.convertTextureSet(textureSet)
 
 def isExportValid():
     if not substance_painter.project.is_open():
         l.log(l.ERROR, PLUGIN_NAME, "No project to export")
         return False
-    if (not config.png_output) or (not config.dds_output):
+
+    if not ("png_output" in ConfigManager.project_config.keys()  and "dds_output" in ConfigManager.project_config.keys()):
         l.log(l.ERROR, PLUGIN_NAME, "You need to set the png and dds output paths before you can export")
         return False
     return True
 
 def show_settings_dialog():
     l.log(l.INFO, PLUGIN_NAME, "Show Settings")
-    ui.Settings_Dialog(config, parent = plugin_widgets[0]).show()
+    ui.Settings_Dialog(parent = plugin_widgets[0]).show()
     
 
 if __name__ == "__main__":

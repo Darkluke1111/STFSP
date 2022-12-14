@@ -4,50 +4,26 @@ from subprocess import Popen, PIPE, CREATE_NO_WINDOW
 from abc import ABC, abstractmethod
 import substance_painter
 import substance_painter.logging as l
-import SkyrimTools.configManager as cm
+import SkyrimTools.configManager as ConfigManager
 from SkyrimTools.constants import PLUGIN_NAME
 
 class AbstractConverter(ABC):
 
-    def convert(self, config: cm.Config):
-
-        sets = substance_painter.textureset.all_texture_sets()
-
+    def convertTextureSet(self, tset):
         kwargs ={}
-        if config.hide_terminal:
-            kwargs["creationflags"] = CREATE_NO_WINDOW
-        
-        for tset in sets:
-
-
-            self.convertTexture(tset, "diffuse", config, kwargs)
-            self.convertTexture(tset, "normal", config, kwargs)
-
-            if config.glow:
-                self.convertTexture(tset, "glow", config, kwargs)
-            else:
-                print("Skipping converting glowmap")
-
-            if config.reflection:
-                self.convertTexture(tset, "reflective", config, kwargs)
-            else:
-                print("Skipping converting reflectionmap")
-
-    def convertTextureSet(self, config: cm.Config, tset):
-        kwargs ={}
-        if config.hide_terminal:
+        if ConfigManager.global_config["hide_terminal"]:
             kwargs["creationflags"] = CREATE_NO_WINDOW
 
-        self.convertTexture(tset, "diffuse", config, kwargs)
-        self.convertTexture(tset, "normal", config, kwargs)
+        self.convertTexture(tset, "diffuse", kwargs)
+        self.convertTexture(tset, "normal", kwargs)
 
-        if config.glow:
-            self.convertTexture(tset, "glow", config, kwargs)
+        if ConfigManager.project_config["glow"]:
+            self.convertTexture(tset, "glow", kwargs)
         else:
             print("Skipping converting glowmap")
 
-        if config.reflection:
-            self.convertTexture(tset, "reflective", config, kwargs)
+        if ConfigManager.project_config["reflection"]:
+            self.convertTexture(tset, "reflective", kwargs)
         else:
             print("Skipping converting reflectionmap")
 
@@ -58,8 +34,8 @@ class AbstractConverter(ABC):
         if(err):
             l.log(l.ERROR, PLUGIN_NAME, err.decode("utf-8"))
 
-    def convertTexture(self, tset, texture, config, kwargs):
-        cmd =  self.buildCommand(tset, texture, config)
+    def convertTexture(self, tset, texture, kwargs):
+        cmd =  self.buildCommand(tset, texture)
         l.log(l.INFO, PLUGIN_NAME, "Running: " + " ".join(cmd))
         p = Popen(cmd, stdout= PIPE, **kwargs)
 
@@ -68,9 +44,9 @@ class AbstractConverter(ABC):
 
 
     @abstractmethod
-    def buildCommand(self, texsetName, config):
+    def buildCommand(self, texsetName):
         pass
 
     @abstractmethod
-    def getCodec(self, map, config: cm.Config):
+    def getCodec(self, map):
         pass

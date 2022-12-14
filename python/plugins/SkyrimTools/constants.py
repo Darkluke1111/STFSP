@@ -1,1 +1,1 @@
-PLUGIN_NAME = "Skyrim_Tools"
+PLUGIN_NAME = "STFSP"

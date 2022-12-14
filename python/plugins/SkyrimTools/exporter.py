@@ -3,41 +3,16 @@ import substance_painter.export
 import substance_painter.resource
 import substance_painter.logging as l
 import substance_painter
-from SkyrimTools.configManager import Config
+import SkyrimTools.configManager as ConfigManager
 from SkyrimTools.constants import PLUGIN_NAME
 
-def export(config: Config):
 
-    outputDir = config.png_output
+def exportTextureSet(tset):
+    outputDir = ConfigManager.project_config["png_output"]
     requiredTextures = ["$textureSet", "$textureSet_n"]
-    if config.glow:
+    if ConfigManager.project_config["glow"]:
         requiredTextures.append("$textureSet_g")
-    if config.reflection:
-        requiredTextures.append("$textureSet_m")
-
-    l.log(l.INFO, PLUGIN_NAME, "Exporting textures: " + " ".join(requiredTextures))
-
-    sets = substance_painter.textureset.all_texture_sets()
-    l.log(l.INFO, PLUGIN_NAME, "Exporting texture sets: " + " ".join(map(lambda x: x.name(),sets)))
-    for tset in sets:
-
-        l.log(l.INFO, PLUGIN_NAME, "Exporting into " + outputDir)
-        export_config = buildExportConfig(outputDir, tset, requiredTextures)
-
-        # Actual export operation:
-        export_result = substance_painter.export.export_project_textures(export_config)
-
-        # In case of error, display a human readable message:
-        if export_result.status != substance_painter.export.ExportStatus.Success:
-            l.log(l.ERROR, PLUGIN_NAME, export_result.message)
-    l.log(l.INFO, PLUGIN_NAME, "Finished expot operation")
-
-def exportTextureSet(config: Config, tset):
-    outputDir = config.png_output
-    requiredTextures = ["$textureSet", "$textureSet_n"]
-    if config.glow:
-        requiredTextures.append("$textureSet_g")
-    if config.reflection:
+    if ConfigManager.project_config["reflection"]:
         requiredTextures.append("$textureSet_m")
 
     l.log(l.INFO, PLUGIN_NAME, "Exporting textures: " + " ".join(requiredTextures))
