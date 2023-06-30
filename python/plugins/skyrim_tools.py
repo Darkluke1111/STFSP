@@ -17,6 +17,7 @@
 from asyncio.log import logger
 import json
 import os
+import SkyrimTools.amdCompressonatorConverter as amdCompressonatorConverter
 import substance_painter.export
 import substance_painter.resource
 import substance_painter
@@ -109,10 +110,13 @@ def exportAndConvertTextureSet(textureSet):
     if not isExportValid():
         return
     exporter.exportTextureSet(textureSet)
-    if ConfigManager.global_config["nvtt_location"] and ConfigManager.global_config["nvtt_location"] != "":
+    if ConfigManager.global_config["compression_tool"] == "AMD Compressonator" and ConfigManager.global_config["amd_compressonator_location"] and ConfigManager.global_config["amd_compressonator_location"] != "":
+        converter = amdCompressonatorConverter.AmdCompressonatorConverter()
+    elif ConfigManager.global_config["compression_tool"] == "NVIDIA Texture Tools" and ConfigManager.global_config["nvtt_location"] and ConfigManager.global_config["nvtt_location"] != "":
         converter = nvidiaConverter.NvidiaConverter()
     else:
         converter = crunchConverter.CrunchConverter()
+
     converter.convertTextureSet(textureSet)
 
 def isExportValid():

@@ -138,8 +138,21 @@ class GlobalConfigTab(QWidget):
 
         self.add_path_select_option(
             name = "NVTT location (if available)",
-            description = "The path of the Nvidia Texture Tools folder. This is only required if you want to use BS7 compression. If nothing is set here it will fall back to crunch compression",
+            description = "The path of the Nvidia Texture Tools executable. This is only required if you want to use BC7 compression.",
             var_name = "nvtt_location"
+        )
+
+        self.add_path_select_option(
+            name = "AMD compressonator location (if available)",
+            description = "The path of the AMD compressonator executable. This is only required if you want to use BC7 compression.",
+            var_name = "amd_compressonator_location"
+        )
+
+        self.add_combo_box_option(
+            name = "Compression Tool",
+            description = "The tool that will be used to compress the textures.",
+            var_name = "compression_tool",
+            options = ["Crunch", "NVIDIA Texture Tools", "AMD Compressonator"]
         )
 
         self.add_checkbox_option(
@@ -194,6 +207,16 @@ class GlobalConfigTab(QWidget):
         textBox.setText(ConfigManager.global_config[var_name])
         textBox.editingFinished.connect(lambda: ConfigManager.set_global_option(var_name, textBox.text()))
         self.layout.addRow(label, textBox)
+
+    def add_combo_box_option(self, name: str, description: str, var_name: str, options: list):
+
+        self.label = QLabel(name)
+        self.label.setToolTip(description)
+        self.combo_box = QComboBox()
+        self.combo_box.addItems(options)
+        self.combo_box.setCurrentText(ConfigManager.global_config[var_name])
+        self.combo_box.currentTextChanged.connect(lambda value: ConfigManager.set_global_option(var_name, value))
+        self.layout.addRow(self.label, self.combo_box)
 
 
 class FileSelectField(QWidget):

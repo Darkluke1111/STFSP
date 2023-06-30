@@ -27,6 +27,8 @@ project_default: ProjectConfig = {
 class GlobalConfig(TypedDict):
     crunch_location: str
     nvtt_location: str
+    amd_compressonator_location: str
+    compression_tool: str
     hide_terminal: bool
     diffuse_suffix: str
     normal_suffix: str
@@ -36,6 +38,8 @@ class GlobalConfig(TypedDict):
 global_default : GlobalConfig = {
     "crunch_location": "",
     "nvtt_location": "",
+    "amd_compressonator_location": "",
+    "compression_tool": "Crunch",
     "hide_terminal": False,
     "diffuse_suffix": "",
     "normal_suffix": "_n",
