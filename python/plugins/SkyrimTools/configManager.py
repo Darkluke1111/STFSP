@@ -68,21 +68,23 @@ def save_project_config() -> None:
 
     localConfig = substance_painter.project.Metadata("skyrim_tools")
     for key, value in project_config.items():
+        #l.log(l.INFO, PLUGIN_NAME, "saving {} = {}".format(key, value))
         localConfig.set(key, value)
+    substance_painter.project.save(substance_painter.project.ProjectSaveMode.Incremental)
 
 
 def load_project_config() -> None:
-    l.log(l.INFO, PLUGIN_NAME, "Loading prject config")
+    l.log(l.INFO, PLUGIN_NAME, "Loading project config")
     global project_config
     if not substance_painter.project.is_open():
         return
     localConfig = substance_painter.project.Metadata("skyrim_tools")
-    l.log(l.INFO, PLUGIN_NAME, "loading project settings")
     
     project_config = project_default.copy()
     
     for key in project_config:
-        project_config[key] = localConfig.get(key)
+        if localConfig.get(key) is not None:
+            project_config[key] = localConfig.get(key)
 
 
 def save_global_config() -> None:
@@ -107,7 +109,11 @@ def load_global_config() -> None:
                 global_config[key] = data[key]
 
 def set_global_option(name, value) -> None:
-    global_config[name] = value
+    if value is not None:
+        l.log(l.INFO, PLUGIN_NAME, "setting global option {} to {}".format(name, value))
+        global_config[name] = value
 
 def set_project_option(name, value) -> None:
-    project_config[name] = value
+    if value is not None:
+        l.log(l.INFO, PLUGIN_NAME, "setting project option {} to {}".format(name, value))
+        project_config[name] = value

@@ -3,6 +3,7 @@ import SkyrimTools.configManager as ConfigManager
 from PySide2.QtCore import QObject, Signal, Slot 
 import substance_painter
 import substance_painter.logging as l
+import substance_painter.project
 from SkyrimTools.constants import PLUGIN_NAME
 
 
@@ -25,11 +26,11 @@ class Settings_Dialog(QDialog):
 
         self.okButton = QPushButton("Save Settings")
         self.okButton.clicked.connect(self.saveSettings)
-        self.cancelButton = QPushButton("Cancel")
-        self.cancelButton.clicked.connect(self.cancel)
-        
         self.buttonLayout.addWidget(self.okButton)
-        self.buttonLayout.addWidget(self.cancelButton)
+
+        #self.cancelButton = QPushButton("Cancel")
+        #self.cancelButton.clicked.connect(self.cancel)
+        #self.buttonLayout.addWidget(self.cancelButton)
         
         self.layout.addWidget(self.tabs)
         self.layout.addLayout(self.buttonLayout)
@@ -68,7 +69,7 @@ class ProjectConfigTab(QWidget):
         )
 
         self.add_checkbox_option(
-            name = "dds export folder",
+            name = "alpha blending used",
             description = "Whether you want to use alpha blending for this texture set. (Textures without blending can be compressed even more)",
             var_name = "alpha_blending"
         )
@@ -108,8 +109,8 @@ class ProjectConfigTab(QWidget):
     def add_path_select_option(self, name: str, description: str, var_name: str):
         label = QLabel(name)
         label.setToolTip(description)
-        field = FileSelectField(ConfigManager.project_config[var_name],parent = self)
-        field.fileSelected.connect(lambda value: ConfigManager.set_global_option(var_name, value))
+        field = FileSelectField("Select " + name, True, ConfigManager.project_config[var_name],parent = self)
+        field.fileSelected.connect(lambda value: ConfigManager.set_project_option(var_name, value))
         self.layout.addRow(label, field)    
 
     def add_checkbox_option(self, name: str, description: str, var_name: str):
@@ -123,6 +124,8 @@ class ProjectConfigTab(QWidget):
 class GlobalConfigTab(QWidget):
     def __init__(self, parent=None):
         super(GlobalConfigTab, self).__init__(parent)
+
+
 
         self.layout = QFormLayout()
         self.setLayout(self.layout)
@@ -172,7 +175,7 @@ class GlobalConfigTab(QWidget):
     def add_path_select_option(self, name: str, description: str, var_name: str):
         label = QLabel(name)
         label.setToolTip(description)
-        field = FileSelectField(ConfigManager.global_config[var_name],parent = self)
+        field = FileSelectField("Select " + name, False, ConfigManager.global_config[var_name],parent = self)
         field.fileSelected.connect(lambda value: ConfigManager.set_global_option(var_name, value))
         self.layout.addRow(label, field)    
 
@@ -189,7 +192,7 @@ class GlobalConfigTab(QWidget):
         label.setToolTip(description)
         textBox = QLineEdit()
         textBox.setText(ConfigManager.global_config[var_name])
-        textBox.editingFinished.connect(lambda value: ConfigManager.set_global_option(var_name, value))
+        textBox.editingFinished.connect(lambda: ConfigManager.set_global_option(var_name, textBox.text()))
         self.layout.addRow(label, textBox)
 
 
@@ -197,11 +200,15 @@ class FileSelectField(QWidget):
 
     fileSelected = Signal(str)
 
-    def __init__(self, default = "", parent = None):
+    def __init__(self, caption: str, dir_select: bool, default = "", parent = None):
         super(FileSelectField, self).__init__(parent)
+
+        self.caption = caption
+        self.dir_select = dir_select
 
         self.textBox = QLineEdit()
         self.textBox.setText(default)
+        self.textBox.editingFinished.connect(lambda: self.fileSelected.emit(self.textBox.text()))
         self.browseButton = QPushButton("browse")
         self.browseButton.clicked.connect(self.selectFile)
 
@@ -210,9 +217,14 @@ class FileSelectField(QWidget):
         layout.addWidget(self.browseButton)
 
     def selectFile(self):
-        file,_ = QFileDialog.getOpenFileName(parent=None, caption='Select Executable', dir=self.textBox.text())
-        self.fileSelected.emit(file)
-        self.textBox.setText(file)
+        if self.dir_select:
+            file = QFileDialog.getExistingDirectory(parent=None, caption=self.caption, dir=self.textBox.text())
+        else: 
+            file,_ = QFileDialog.getOpenFileName(parent=None, caption=self.caption, dir=self.textBox.text())
+        l.log(l.INFO,PLUGIN_NAME, "Selected file: " + str(file))
+        if file:
+            self.fileSelected.emit(file)
+            self.textBox.setText(file)
 
     def text(self):
         return self.textBox.text()
