@@ -4,11 +4,14 @@ import SkyrimTools.configManager as ConfigManager
 
 class NvidiaConverter(AbstractConverter):
 
+    def getName(self):
+        return "Nvidia Texture Tools"
+
     def buildCommand(self, texset, map):
-        nvttPath = ConfigManager.global_config["nvtt_location"]
+        path = texconv_path = ConfigManager.global_config["executables"].get("{}_location".format(self.getName()))
         suffix = ConfigManager.global_config[map + "_suffix"]
         codec = self.getCodec(map)
-        return [nvttPath, 
+        return [path, 
                     #'-silent',
                     #'-fast' if config.quality == 'fast' else '-production',
                     '-{}'.format(codec),

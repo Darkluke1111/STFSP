@@ -4,12 +4,15 @@ import SkyrimTools.configManager as ConfigManager
 
 class CrunchConverter(AbstractConverter):
 
+    def getName(self):
+        return "Crunch"
+
     def buildCommand(self, texset, map):
         suffix = ConfigManager.global_config[map + "_suffix"]
         codec = self.getCodec(map)
-        crunch_exe_path = ConfigManager.global_config["crunch_location"]
-        print("running converter at {}".format(crunch_exe_path))
-        return [crunch_exe_path, 
+        path = ConfigManager.global_config["executables"].get("{}_location".format(self.getName()))
+        print("running converter at {}".format(path))
+        return [path, 
                     '-file', '{}/{}{}.png'.format(ConfigManager.project_config["png_output"],texset, suffix),
                     '-outdir', ConfigManager.project_config["dds_output"], 
                     '-fileformat', 'dds', '-{}'.format(codec), 

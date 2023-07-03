@@ -5,6 +5,7 @@ import substance_painter
 import substance_painter.logging as l
 import substance_painter.project
 from SkyrimTools.constants import PLUGIN_NAME
+import skyrim_tools
 
 
 class Settings_Dialog(QDialog):
@@ -130,29 +131,18 @@ class GlobalConfigTab(QWidget):
         self.layout = QFormLayout()
         self.setLayout(self.layout)
 
-        self.add_path_select_option(
-            name = "crunch_64 location",
-            description = "The path of the crunch_64 executable.",
-            var_name = "crunch_location"
-        )
-
-        self.add_path_select_option(
-            name = "NVTT location (if available)",
-            description = "The path of the Nvidia Texture Tools executable. This is only required if you want to use BC7 compression.",
-            var_name = "nvtt_location"
-        )
-
-        self.add_path_select_option(
-            name = "AMD compressonator location (if available)",
-            description = "The path of the AMD compressonator executable. This is only required if you want to use BC7 compression.",
-            var_name = "amd_compressonator_location"
-        )
+        for converter in skyrim_tools.converters:
+            self.add_executable_path_select_option(
+                name = "{} location".format(converter.getName()),
+                description = "The path of the {} executable.".format(converter.getName()),
+                var_name = "{}_location".format(converter.getName())
+            )
 
         self.add_combo_box_option(
             name = "Compression Tool",
             description = "The tool that will be used to compress the textures.",
             var_name = "compression_tool",
-            options = ["Crunch", "NVIDIA Texture Tools", "AMD Compressonator"]
+            options = map(lambda x: x.getName(),skyrim_tools.converters)
         )
 
         self.add_checkbox_option(
@@ -185,11 +175,11 @@ class GlobalConfigTab(QWidget):
             var_name = "reflective_suffix"
         )
 
-    def add_path_select_option(self, name: str, description: str, var_name: str):
+    def add_executable_path_select_option(self, name: str, description: str, var_name: str):
         label = QLabel(name)
         label.setToolTip(description)
-        field = FileSelectField("Select " + name, False, ConfigManager.global_config[var_name],parent = self)
-        field.fileSelected.connect(lambda value: ConfigManager.set_global_option(var_name, value))
+        field = FileSelectField("Select " + name, False, ConfigManager.global_config["executables"].get(var_name) or "" ,parent = self)
+        field.fileSelected.connect(lambda value: ConfigManager.add_executable(var_name, value))
         self.layout.addRow(label, field)    
 
     def add_checkbox_option(self, name: str, description: str, var_name: str):

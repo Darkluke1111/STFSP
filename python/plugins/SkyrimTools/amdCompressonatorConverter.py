@@ -4,12 +4,15 @@ import SkyrimTools.configManager as ConfigManager
 
 class AmdCompressonatorConverter(AbstractConverter):
 
+    def getName(self):
+        return "AMD Compressonator"
+
     def buildCommand(self, texset, map):
-        compressonatorPath = ConfigManager.global_config["amd_compressonator_location"]
+        path = ConfigManager.global_config["executables"].get("{}_location".format(self.getName()))
         suffix = ConfigManager.global_config[map + "_suffix"]
         codec = self.getCodec(map)
         quality = 1.0  # Set the quality level to a constant value of 1.0
-        return [compressonatorPath, 
+        return [path, 
                     '-fd', codec,  # Specify the compression format based on the codec
                     '-Quality', str(quality),  # Set the quality level
                     '-EncodeWith', 'GPU', # Use the GPU to encode

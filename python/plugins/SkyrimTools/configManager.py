@@ -4,6 +4,7 @@ import json
 import os
 from SkyrimTools.constants import PLUGIN_NAME
 from typing import TypedDict
+import skyrim_tools
 
 class ProjectConfig(TypedDict):
     png_output: str
@@ -25,9 +26,7 @@ project_default: ProjectConfig = {
 }
 
 class GlobalConfig(TypedDict):
-    crunch_location: str
-    nvtt_location: str
-    amd_compressonator_location: str
+    executables: dict
     compression_tool: str
     hide_terminal: bool
     diffuse_suffix: str
@@ -36,9 +35,7 @@ class GlobalConfig(TypedDict):
     reflective_suffix: str
 
 global_default : GlobalConfig = {
-    "crunch_location": "",
-    "nvtt_location": "",
-    "amd_compressonator_location": "",
+    "executables": {},
     "compression_tool": "Crunch",
     "hide_terminal": False,
     "diffuse_suffix": "",
@@ -116,6 +113,12 @@ def set_global_option(name, value) -> None:
     if value is not None:
         l.log(l.INFO, PLUGIN_NAME, "setting global option {} to {}".format(name, value))
         global_config[name] = value
+
+def add_executable(name, path) -> None:
+    global global_config
+    if name is not None and path is not None:
+        l.log(l.INFO, PLUGIN_NAME, "adding executable {} at {}".format(name, path))
+        global_config["executables"][name] = path
 
 def set_project_option(name, value) -> None:
     if value is not None:

@@ -31,12 +31,15 @@ import SkyrimTools.exporter as exporter
 import SkyrimTools.configManager as ConfigManager
 import SkyrimTools.crunchConverter as crunchConverter
 import SkyrimTools.nvidiaConverter as nvidiaConverter
+import SkyrimTools.texconvConverter as texconvConverter
 from SkyrimTools.constants import PLUGIN_NAME
 
 
 plugin_widgets = []
 pluginDirPath = None
 export_one_menu = None
+
+converters = [amdCompressonatorConverter.AmdCompressonatorConverter(), crunchConverter.CrunchConverter(), nvidiaConverter.NvidiaConverter(), texconvConverter.TexConvConverter()]
 
 def start_plugin():
     setPluginPath()
@@ -110,14 +113,13 @@ def exportAndConvertTextureSet(textureSet):
     if not isExportValid():
         return
     exporter.exportTextureSet(textureSet)
-    if ConfigManager.global_config["compression_tool"] == "AMD Compressonator" and ConfigManager.global_config["amd_compressonator_location"] and ConfigManager.global_config["amd_compressonator_location"] != "":
-        converter = amdCompressonatorConverter.AmdCompressonatorConverter()
-    elif ConfigManager.global_config["compression_tool"] == "NVIDIA Texture Tools" and ConfigManager.global_config["nvtt_location"] and ConfigManager.global_config["nvtt_location"] != "":
-        converter = nvidiaConverter.NvidiaConverter()
-    else:
-        converter = crunchConverter.CrunchConverter()
 
-    converter.convertTextureSet(textureSet)
+    compression_tool = ConfigManager.global_config["compression_tool"]
+
+    for converter in converters:
+        if converter.getName() == compression_tool:
+            converter.convertTextureSet(textureSet)
+    
 
 def isExportValid():
     if not substance_painter.project.is_open():

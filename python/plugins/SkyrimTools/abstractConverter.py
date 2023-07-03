@@ -30,7 +30,10 @@ class AbstractConverter(ABC):
 
     def logIfPresent(self,msg, err):
         if(msg):
-            l.log(l.INFO, PLUGIN_NAME, msg.decode("utf-8"))
+            try:
+                l.log(l.INFO, PLUGIN_NAME, msg.decode("utf-8"))
+            except:
+                l.log(l.INFO, PLUGIN_NAME, msg.decode("latin-1"))
         if(err):
             l.log(l.ERROR, PLUGIN_NAME, err.decode("utf-8"))
 
@@ -49,4 +52,8 @@ class AbstractConverter(ABC):
 
     @abstractmethod
     def getCodec(self, map):
+        pass
+
+    @abstractmethod
+    def getName(self):
         pass
