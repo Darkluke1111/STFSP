@@ -14,6 +14,7 @@ class TexConvConverter(AbstractConverter):
         return ['{}'.format(path).replace('/','\\') ,
                     '-f', '{}'.format(codec),
                     '-y',
+                    '-m', '3',
                     '-o', '{}'.format(ConfigManager.project_config["dds_output"]).replace('/','\\'),
                     '{}/{}{}.png'.format(ConfigManager.project_config["png_output"] ,texset, suffix).replace('/','\\'),
                 ]
